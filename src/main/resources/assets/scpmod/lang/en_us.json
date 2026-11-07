@@ -39,5 +39,12 @@
 	"command.scpmod.anomaly.cleared": "Anomaly body removed.",
 	"message.scpmod.ambient.near": "A chill runs down your spine... something made of concrete is nearby...",
 	"message.scpmod.ambient.far": "The air around you feels less oppressive now...",
-	"subtitles.scpmod.scrape": "SCP173: Scraping"
+	"subtitles.scpmod.scrape": "SCP173: Scraping",
+	"item.scpmod.scp_500": "SCP-500 Panacea Pill",
+	"scp.scpmod.scp_500": "SCP-500 Panacea",
+	"effect.scpmod.scp500_resistance": "SCP-500 Resistance",
+	"message.scpmod.scp500.healed": "Your ailments fade away... (%s negative effect(s) removed)",
+	"message.scpmod.scp500.weak": "The medicine feels weaker (resistance level %s, reduced healing) - %s negative effect(s) removed.",
+	"command.scpmod.give": "Gave %s x %s",
+	"command.scpmod.give.no_player": "This command must be run by a player."
 }

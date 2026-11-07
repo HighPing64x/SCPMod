@@ -265,3 +265,14 @@
 | assets/scpmod/sounds/scrape1.ogg ~ scrape3.ogg | 自制刮石音效（ffmpeg 转 ogg） |
 | assets/scpmod/sounds.json | scrape 事件：字幕 + 3 段音源 |
 | event/AnomalyController.java | isObservedByAnyone 9 采样点 + 旁观者排除；wander 村民踱步 |
+
+## [2026-11-07 20:49:15] SCP-500 文件
+| 路径 | 说明 |
+|---|---|
+| src/main/java/com/scpmod/item/Scp500Item.java | 药丸物品与治愈逻辑（含抗药性减弱） |
+| src/main/java/com/scpmod/effect/Scp500ResistanceEffect.java | 抗药性状态效果 |
+| src/main/java/com/scpmod/content/ModEffects.java | 效果注册 |
+| src/main/resources/assets/scpmod/items/scp_500.json | 26.2 物品模型定义 |
+| src/main/resources/assets/scpmod/models/item/scp_500.json | 物品模型 |
+| src/main/resources/assets/scpmod/textures/item/scp_500.png | 16×16 红色药片图标 |
+| docs/scp500_icon_preview.png | 图标预览（8×放大） |

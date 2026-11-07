@@ -7,6 +7,7 @@ import com.scpmod.config.ScpModConfig;
 import com.scpmod.content.ModBlockEntities;
 import com.scpmod.content.ModBlocks;
 import com.scpmod.content.ModCreativeTabs;
+import com.scpmod.content.ModEffects;
 import com.scpmod.content.ModEntities;
 import com.scpmod.content.ModItems;
 import com.scpmod.content.ModSounds;
@@ -47,6 +48,7 @@ public class ScpMod implements ModInitializer {
 		ModBlockEntities.register();
 		ModItems.register();
 		ModSounds.register();
+		ModEffects.register();
 		ModCreativeTabs.register();
 		ModEntities.register();
 		ModStructures.register();

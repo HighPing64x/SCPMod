@@ -371,3 +371,32 @@
 - 已删除含旧历史的备份目录（位于本地工具缓存区）
 - 提醒：GitHub 服务端可能缓存旧对象一段时间；正常仓库 History 已干净；若旧 commit 直链仍可访问，可等待回收或删库重建
 - 磨石音效（`block.grindstone.use`）已构建；客户端已重启测试
+
+## [2026-11-07 20:49:15] SCP-500 万能药完成（按 ask 工具收集的需求）
+- 需求确认（ask 工具）：单独药丸物品（原设定最初 59 片）、创造栏 + /scp give、清除全部负面+回满血+灭火/解冻+疾病接口+死亡无效、**抗药性做成状态效果**（有该效果时服用效果减弱）、登记 Safe 级、程序化红色药片图标、右键立即服用+喝药水声+红色粒子+提示消息
+- 实现：
+  - `content/ModEffects`：注册 `scpmod:scp500_resistance`（HARMFUL，色 0x8B3A3A），子类 `effect/Scp500ResistanceEffect`
+  - `item/Scp500Item`：右键服用；完整版清除所有 HARMFUL 效果 + 回满血 + clearFire/setTicksFrozen(0)；抗药性版本只清中毒/凋零/饥饿、回 50% 血；每次服用后给 10 分钟抗药性
+  - `ModItems.SCP_500`（stacksTo 59）、创造栏「方块&杂项」、`/scp give scp_500 [count]`
+  - `ScpDefinition` 增加 `classification` 字段；注册 SCP-173=Euclid、SCP-500=Safe（threat=1）
+  - 资源：`items/scp_500.json`（26.2 item model definition）、`models/item/scp_500.json`、`textures/item/scp_500.png`（16×16 红色药片，程序化生成）、中英文语言键
+- 顺带修复：scripts/{build,run-server,selftest}.ps1 之前隐私脱敏把路径替换成占位符导致脚本无法运行；已改为读取环境变量（JAVA_HOME / GRADLE_USER_HOME / SCPMOD_GRADLE）
+- 自检 7/7 PASS；客户端已重启待测
+- 未提交 git（按约定用户自行提交）
+
+## [2026-11-07 20:56:34] SCP-500 修复：抗药性效果图标 + 负面效果清除逻辑
+- 用户反馈：抗药性效果图标也要用 SCP-500 的图片；服用后似乎没有去除效果；用户自己改过 scp_500.png
+- 已复制 `textures/item/scp_500.png`（用户修改版）→ `textures/mob_effect/scp500_resistance.png`（状态效果图标）
+- 清除逻辑修改：之前抗药性期间只清除中毒/凋零/饥饿，容易让玩家觉得“没清效果”；现在**总是清除所有负面效果**，抗药性只表现为回血减半
+- 提示消息带清除数量；服务端加日志 `[scpmod] scp500 used by ... resistant=... cleared=N`，便于确认是否触发
+- 构建通过；客户端已重启待测
+- 未提交 git
+
+## [2026-11-07 21:08:02] SCP-500：多等级抗药性 + 修复误计数 + 模组兼容接口
+- 用户反馈：没有负面效果却显示清除了 1 个 —— 原因是抗药性效果本身是 HARMFUL，被计入清除；已改为**跳过抗药性自身**（不计数）
+- 多等级抗药性：再次服用时等级 +1（上限 V），持续时间重置为 10 分钟；回血系数按等级递减（I 50% / II 35% / III 25% / IV 15% / V 10%）；提示带等级与清除数
+- 模组兼容：
+  - 清除判定改为 `HARMFUL 分类 || 效果在标签 scpmod:curable_effects 中`；数据包 `data/scpmod/tags/mob_effect/curable_effects.json`
+  - 新增公开 API `com.scpmod.api.Scp500Events.CURE`（Fabric Event），其他模组可监听以清理自定义“感染/疾病”机制
+- 修复变量重名（level）；构建通过；客户端已重启
+- 未提交 git

@@ -1,6 +1,7 @@
 package com.scpmod.command;
 
 import com.scpmod.config.AnomalyConfig;
+import com.scpmod.content.ModItems;
 import com.scpmod.config.EventConfig;
 import com.scpmod.config.ScpModConfig;
 import com.scpmod.event.AnomalyController;
@@ -12,6 +13,8 @@ import com.scpmod.block.entity.TerminalBlockEntity;
 import com.scpmod.structure.StationBlueprint;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 
 /** /scp debug and status commands (D20). */
@@ -34,6 +38,20 @@ public final class ScpCommand {
 	private static BlockPos lookedAtBlock(ServerPlayer player) {
 		HitResult hit = player.pick(6.0D, 0.0F, false);
 		return hit instanceof BlockHitResult blockHit ? blockHit.getBlockPos() : null;
+	}
+
+	private static int giveScp500(CommandContext<CommandSourceStack> context, int count) {
+		try {
+			ServerPlayer player = context.getSource().getPlayerOrException();
+			ItemStack stack = new ItemStack(ModItems.SCP_500, count);
+			player.getInventory().placeItemBackInInventory(stack);
+			context.getSource().sendSuccess(() -> Component.translatable("command.scpmod.give",
+					stack.getCount(), stack.getHoverName()), true);
+			return 1;
+		} catch (Exception exception) {
+			context.getSource().sendFailure(Component.translatable("command.scpmod.give.no_player"));
+			return 0;
+		}
 	}
 
 	private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -55,6 +73,11 @@ public final class ScpCommand {
 					context.getSource().sendSuccess(() -> Component.translatable("command.scpmod.reloaded"), true);
 					return 1;
 				}))
+				.then(Commands.literal("give")
+						.then(Commands.literal("scp_500")
+								.executes(context -> giveScp500(context, 1))
+								.then(Commands.argument("count", IntegerArgumentType.integer(1, 59))
+										.executes(context -> giveScp500(context, IntegerArgumentType.getInteger(context, "count"))))))
 				.then(Commands.literal("look").executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
 					HitResult hit = player.pick(6.0D, 0.0F, false);

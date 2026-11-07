@@ -18,7 +18,9 @@ public final class ScpRegistry {
 
 	public static void bootstrap() {
 		// M1 reference anomaly: SCP-173 (used to validate the framework end to end in M2).
-		register(new ScpDefinition(ScpMod.id("scp_173"), "scp.scpmod.scp_173", 3));
+		register(new ScpDefinition(ScpMod.id("scp_173"), "scp.scpmod.scp_173", 3, "Euclid"));
+		// SCP-500: panacea pills (Safe, 59 pills originally).
+		register(new ScpDefinition(ScpMod.id("scp_500"), "scp.scpmod.scp_500", 1, "Safe"));
 	}
 
 	public static ScpDefinition register(ScpDefinition definition) {
