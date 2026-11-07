@@ -18,16 +18,25 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
-/** SCP-500 万能药：右键立即服用，清除疾病/负面效果并回血；多次服用会产生逐级抗药性。 */
+/**
+ * SCP-500 万能药：右键立即服用。
+ * 无抗药性时完整治愈；抗药性 I~V 级效果逐级减弱（随机清效果 / 回血减少 / 改为生命恢复 / 完全无效）。
+ */
 public class Scp500Item extends Item {
 	private static final int RESISTANCE_TICKS = 20 * 60 * 10;
 	private static final int MAX_RESISTANCE_LEVEL = 4;
+	private static final int REGEN_TICKS = 200;
+	private static final Random RANDOM = new Random();
 	/** 可通过数据包标签让其他模组的效果也被 SCP-500 清除。 */
 	private static final TagKey<MobEffect> CURABLE_EFFECTS =
 			TagKey.create(Registries.MOB_EFFECT, ScpMod.id("curable_effects"));
@@ -51,31 +60,57 @@ public class Scp500Item extends Item {
 	}
 
 	private static void applyCure(ServerLevel level, ServerPlayer player, boolean resistant, int resistanceLevel) {
-		int removed = 0;
-		for (MobEffectInstance instance : new ArrayList<>(player.getActiveEffects())) {
+		// 抗药性 V 级：完全无效（只刷新抗药性持续时间）。
+		if (resistant && resistanceLevel >= MAX_RESISTANCE_LEVEL) {
+			player.addEffect(new MobEffectInstance(ModEffects.SCP500_RESISTANCE_HOLDER, RESISTANCE_TICKS, resistanceLevel, false, true, true));
+			level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.6F, 0.7F);
+			player.sendSystemMessage(Component.translatable("message.scpmod.scp500.no_effect"));
+			ScpMod.LOGGER.info("[scpmod] scp500 used by {} resistant={} level={} cleared=0 (no effect)",
+					player.getName().getString(), true, resistanceLevel + 1);
+			return;
+		}
+
+		List<MobEffectInstance> curable = new ArrayList<>();
+		for (MobEffectInstance instance : player.getActiveEffects()) {
 			Holder<MobEffect> effect = instance.getEffect();
-			// 抗药性本身不算“被清除的负面效果”。
 			if (effect.is(ModEffects.SCP500_RESISTANCE_HOLDER)) {
 				continue;
 			}
-			boolean harmful = effect.value().getCategory() == MobEffectCategory.HARMFUL || effect.is(CURABLE_EFFECTS);
-			if (!harmful) {
-				continue;
+			if (effect.value().getCategory() == MobEffectCategory.HARMFUL || effect.is(CURABLE_EFFECTS)) {
+				curable.add(instance);
 			}
-			player.removeEffect(effect);
-			removed++;
 		}
 
-		float factor = switch (resistanceLevel) {
-			case 0 -> 0.5F;
-			case 1 -> 0.35F;
-			case 2 -> 0.25F;
-			case 3 -> 0.15F;
-			default -> 0.10F;
-		};
-		float heal = resistant ? player.getMaxHealth() * factor : player.getMaxHealth();
-		player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + heal));
-		if (!resistant) {
+		int removed = 0;
+		if (!resistant || resistanceLevel <= 1) {
+			// 无抗药性 / I 级：清除全部负面效果。
+			for (MobEffectInstance instance : curable) {
+				player.removeEffect(instance.getEffect());
+				removed++;
+			}
+		} else {
+			// II 级随机 2 个；III/IV 级随机 1 个。
+			Collections.shuffle(curable, RANDOM);
+			int count = resistanceLevel == 2 ? 2 : 1;
+			for (int i = 0; i < curable.size() && i < count; i++) {
+				player.removeEffect(curable.get(i).getEffect());
+				removed++;
+			}
+		}
+
+		if (resistant && resistanceLevel >= 4) {
+			// IV 级：不再瞬间回血，改为缓慢的生命恢复效果。
+			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, REGEN_TICKS, 0, false, true, true));
+		} else {
+			float factor = !resistant ? 1.0F : switch (resistanceLevel) {
+				case 1 -> 0.5F;
+				case 2 -> 0.35F;
+				default -> 0.25F;
+			};
+			float heal = player.getMaxHealth() * factor;
+			player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + heal));
+		}
+		if (!resistant || resistanceLevel <= 1) {
 			player.clearFire();
 			player.setTicksFrozen(0);
 		}
@@ -85,15 +120,16 @@ public class Scp500Item extends Item {
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
 				player.getX(), player.getY() + 1.0D, player.getZ(), 24, 0.5D, 0.8D, 0.5D, 0.02D);
 
-		// 给其他模组的兼容回调（清除自定义感染/疾病机制）。
 		Scp500Events.CURE.invoker().onCure(player, resistant);
 
-		if (resistant) {
-			player.sendSystemMessage(Component.translatable("message.scpmod.scp500.weak",
-					resistanceLevel + 1, removed));
-		} else {
-			player.sendSystemMessage(Component.translatable("message.scpmod.scp500.healed", removed));
-		}
+		Component message = switch (resistanceLevel) {
+			case 0 -> Component.translatable("message.scpmod.scp500.healed", removed);
+			case 1 -> Component.translatable("message.scpmod.scp500.weak", removed);
+			case 2 -> Component.translatable("message.scpmod.scp500.random_two", removed);
+			case 3 -> Component.translatable("message.scpmod.scp500.random_one", removed);
+			default -> Component.translatable("message.scpmod.scp500.regen");
+		};
+		player.sendSystemMessage(message);
 		ScpMod.LOGGER.info("[scpmod] scp500 used by {} resistant={} level={} cleared={}",
 				player.getName().getString(), resistant, resistanceLevel + 1, removed);
 	}

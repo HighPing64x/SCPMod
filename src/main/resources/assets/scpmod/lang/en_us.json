@@ -44,7 +44,11 @@
 	"scp.scpmod.scp_500": "SCP-500 Panacea",
 	"effect.scpmod.scp500_resistance": "SCP-500 Resistance",
 	"message.scpmod.scp500.healed": "Your ailments fade away... (%s negative effect(s) removed)",
-	"message.scpmod.scp500.weak": "The medicine feels weaker (resistance level %s, reduced healing) - %s negative effect(s) removed.",
+	"message.scpmod.scp500.weak": "Resistance I: healing halved - %s negative effect(s) removed.",
 	"command.scpmod.give": "Gave %s x %s",
-	"command.scpmod.give.no_player": "This command must be run by a player."
+	"command.scpmod.give.no_player": "This command must be run by a player.",
+	"message.scpmod.scp500.random_two": "Resistance II: only %s random negative effect(s) removed.",
+	"message.scpmod.scp500.random_one": "Resistance III: healing reduced further - only %s random negative effect(s) removed.",
+	"message.scpmod.scp500.regen": "Resistance IV: instant healing no longer works - only slow regeneration.",
+	"message.scpmod.scp500.no_effect": "Resistance V: SCP-500 has no effect on you anymore."
 }

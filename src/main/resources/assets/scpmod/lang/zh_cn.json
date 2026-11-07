@@ -44,7 +44,11 @@
 	"scp.scpmod.scp_500": "SCP-500 万能药",
 	"effect.scpmod.scp500_resistance": "SCP-500 抗药性",
 	"message.scpmod.scp500.healed": "你感到体内的病痛与不适正在消退……（清除了 %s 个负面效果）",
-	"message.scpmod.scp500.weak": "药效减弱（抗药性 %s 级，回血减少）——清除了 %s 个负面效果。",
+	"message.scpmod.scp500.weak": "抗药性 I 级：回血减半——清除了 %s 个负面效果。",
 	"command.scpmod.give": "已给予 %s × %s",
-	"command.scpmod.give.no_player": "该命令必须由玩家执行。"
+	"command.scpmod.give.no_player": "该命令必须由玩家执行。",
+	"message.scpmod.scp500.random_two": "抗药性 II 级：只随机清除了 %s 个负面效果。",
+	"message.scpmod.scp500.random_one": "抗药性 III 级：回血继续减少——只随机清除了 %s 个负面效果。",
+	"message.scpmod.scp500.regen": "抗药性 IV 级：无法瞬间治愈，只获得缓慢的生命恢复效果。",
+	"message.scpmod.scp500.no_effect": "抗药性 V 级：SCP-500 对你已经完全无效了。"
 }
