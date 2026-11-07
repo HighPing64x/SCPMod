@@ -1,0 +1,16 @@
+{
+  "type": "scpmod:scp_station",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:taiga",
+    "minecraft:dark_forest",
+    "minecraft:snowy_plains",
+    "minecraft:meadow"
+  ],
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin"
+}

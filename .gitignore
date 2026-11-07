@@ -1,0 +1,35 @@
+# build / dev outputs
+build/
+.gradle/
+run/
+*.log
+build-log.txt
+gradle-build.log
+runserver.log
+# local verification scratch
+.compilecheck/
+.nettest/
+*.tmp
+
+# IDE / editor
+.idea/
+*.iml
+.vscode/
+*.class
+.project
+.classpath
+.settings/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# crash / heap dumps
+crash-reports/
+logs/
+hs_err_pid*.log
+replay_pid*.log
+
+# stray literal env-var dirs (created by a mis-expanded shell command)
+%SystemDrive%/

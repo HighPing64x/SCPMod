@@ -1,0 +1,11 @@
+{
+  "scrape": {
+    "subtitle": "subtitles.scpmod.scrape",
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:block.grindstone.use"
+      }
+    ]
+  }
+}
