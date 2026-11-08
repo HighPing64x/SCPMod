@@ -36,6 +36,8 @@ public final class ModCreativeTabs {
 					output.accept(ModItems.CONTAINMENT_UNIT);
 					output.accept(ModItems.TERMINAL);
 					output.accept(ModItems.SCP_500);
+					output.accept(ModItems.SCP_005);
+					output.accept(ModItems.SCP_DOCUMENT);
 				})
 				.build());
 

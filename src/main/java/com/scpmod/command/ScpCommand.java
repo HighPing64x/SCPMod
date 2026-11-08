@@ -2,6 +2,7 @@ package com.scpmod.command;
 
 import com.scpmod.config.AnomalyConfig;
 import com.scpmod.content.ModItems;
+import com.scpmod.item.ScpDocumentItem;
 import com.scpmod.config.EventConfig;
 import com.scpmod.config.ScpModConfig;
 import com.scpmod.event.AnomalyController;
@@ -40,10 +41,9 @@ public final class ScpCommand {
 		return hit instanceof BlockHitResult blockHit ? blockHit.getBlockPos() : null;
 	}
 
-	private static int giveScp500(CommandContext<CommandSourceStack> context, int count) {
+	private static int giveItem(CommandContext<CommandSourceStack> context, ItemStack stack) {
 		try {
 			ServerPlayer player = context.getSource().getPlayerOrException();
-			ItemStack stack = new ItemStack(ModItems.SCP_500, count);
 			player.getInventory().placeItemBackInInventory(stack);
 			context.getSource().sendSuccess(() -> Component.translatable("command.scpmod.give",
 					stack.getCount(), stack.getHoverName()), true);
@@ -73,11 +73,20 @@ public final class ScpCommand {
 					context.getSource().sendSuccess(() -> Component.translatable("command.scpmod.reloaded"), true);
 					return 1;
 				}))
+				.then(Commands.literal("document")
+						.executes(context -> {
+							ServerPlayer player = context.getSource().getPlayerOrException();
+							ScpDocumentItem.recordAll(player);
+							return 1;
+						}))
 				.then(Commands.literal("give")
 						.then(Commands.literal("scp_500")
-								.executes(context -> giveScp500(context, 1))
+								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_500, 1)))
 								.then(Commands.argument("count", IntegerArgumentType.integer(1, 59))
-										.executes(context -> giveScp500(context, IntegerArgumentType.getInteger(context, "count"))))))
+										.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_500,
+												IntegerArgumentType.getInteger(context, "count"))))))
+						.then(Commands.literal("scp_005")
+								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_005, 1)))))
 				.then(Commands.literal("look").executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
 					HitResult hit = player.pick(6.0D, 0.0F, false);

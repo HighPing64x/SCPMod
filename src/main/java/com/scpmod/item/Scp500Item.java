@@ -3,6 +3,7 @@ package com.scpmod.item;
 import com.scpmod.ScpMod;
 import com.scpmod.api.Scp500Events;
 import com.scpmod.content.ModEffects;
+import com.scpmod.item.ScpDocumentItem;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,14 +31,16 @@ import java.util.Random;
 
 /**
  * SCP-500 万能药：右键立即服用。
- * 无抗药性时完整治愈；抗药性 I~V 级效果逐级减弱（随机清效果 / 回血减少 / 改为生命恢复 / 完全无效）。
+ * 效果由【服用前】已有的抗药性等级决定：
+ * 无抗药性 = 完整治愈；I = 回血减半；II = 随机清 2 个；III = 随机清 1 个且回血更少；
+ * IV = 只能获得缓慢生命恢复；V = 完全无效。每次服用后抗药性等级 +1（上限 V），时间重置。
  */
 public class Scp500Item extends Item {
 	private static final int RESISTANCE_TICKS = 20 * 60 * 10;
+	/** 抗药性最高等级：amplifier 4 = V 级。 */
 	private static final int MAX_RESISTANCE_LEVEL = 4;
 	private static final int REGEN_TICKS = 200;
 	private static final Random RANDOM = new Random();
-	/** 可通过数据包标签让其他模组的效果也被 SCP-500 清除。 */
 	private static final TagKey<MobEffect> CURABLE_EFFECTS =
 			TagKey.create(Registries.MOB_EFFECT, ScpMod.id("curable_effects"));
 
@@ -49,9 +52,11 @@ public class Scp500Item extends Item {
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
 			MobEffectInstance existing = serverPlayer.getEffect(ModEffects.SCP500_RESISTANCE_HOLDER);
-			boolean resistant = existing != null;
-			int resistanceLevel = resistant ? Math.min(existing.getAmplifier() + 1, MAX_RESISTANCE_LEVEL) : 0;
-			applyCure(serverLevel, serverPlayer, resistant, resistanceLevel);
+			// currentLevel: -1 = 无抗药性，0 = I 级，1 = II 级，2 = III 级，3 = IV 级，4 = V 级
+			int currentLevel = existing == null ? -1 : existing.getAmplifier();
+			int nextLevel = Math.min(currentLevel + 1, MAX_RESISTANCE_LEVEL);
+			applyCure(serverLevel, serverPlayer, currentLevel, nextLevel);
+			ScpDocumentItem.record(serverPlayer, "scp_500");
 			if (!serverPlayer.getAbilities().instabuild) {
 				serverPlayer.getItemInHand(hand).shrink(1);
 			}
@@ -59,14 +64,13 @@ public class Scp500Item extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
-	private static void applyCure(ServerLevel level, ServerPlayer player, boolean resistant, int resistanceLevel) {
-		// 抗药性 V 级：完全无效（只刷新抗药性持续时间）。
-		if (resistant && resistanceLevel >= MAX_RESISTANCE_LEVEL) {
-			player.addEffect(new MobEffectInstance(ModEffects.SCP500_RESISTANCE_HOLDER, RESISTANCE_TICKS, resistanceLevel, false, true, true));
+	private static void applyCure(ServerLevel level, ServerPlayer player, int currentLevel, int nextLevel) {
+		// V 级：完全无效，只刷新抗药性时间。
+		if (currentLevel >= MAX_RESISTANCE_LEVEL) {
+			player.addEffect(new MobEffectInstance(ModEffects.SCP500_RESISTANCE_HOLDER, RESISTANCE_TICKS, nextLevel, false, true, true));
 			level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 0.6F, 0.7F);
 			player.sendSystemMessage(Component.translatable("message.scpmod.scp500.no_effect"));
-			ScpMod.LOGGER.info("[scpmod] scp500 used by {} resistant={} level={} cleared=0 (no effect)",
-					player.getName().getString(), true, resistanceLevel + 1);
+			ScpMod.LOGGER.info("[scpmod] scp500 used by {} level=5 cleared=0 (no effect)", player.getName().getString());
 			return;
 		}
 
@@ -82,55 +86,56 @@ public class Scp500Item extends Item {
 		}
 
 		int removed = 0;
-		if (!resistant || resistanceLevel <= 1) {
+		if (currentLevel <= 0) {
 			// 无抗药性 / I 级：清除全部负面效果。
 			for (MobEffectInstance instance : curable) {
 				player.removeEffect(instance.getEffect());
 				removed++;
 			}
 		} else {
-			// II 级随机 2 个；III/IV 级随机 1 个。
+			// II 级随机 2 个；III / IV 级随机 1 个。
 			Collections.shuffle(curable, RANDOM);
-			int count = resistanceLevel == 2 ? 2 : 1;
+			int count = currentLevel == 1 ? 2 : 1;
 			for (int i = 0; i < curable.size() && i < count; i++) {
 				player.removeEffect(curable.get(i).getEffect());
 				removed++;
 			}
 		}
 
-		if (resistant && resistanceLevel >= 4) {
-			// IV 级：不再瞬间回血，改为缓慢的生命恢复效果。
+		if (currentLevel >= 3) {
+			// IV 级：不瞬间回血，只给缓慢生命恢复。
 			player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, REGEN_TICKS, 0, false, true, true));
 		} else {
-			float factor = !resistant ? 1.0F : switch (resistanceLevel) {
-				case 1 -> 0.5F;
-				case 2 -> 0.35F;
+			float factor = switch (currentLevel) {
+				case -1 -> 1.0F;
+				case 0 -> 0.5F;
+				case 1 -> 0.35F;
 				default -> 0.25F;
 			};
 			float heal = player.getMaxHealth() * factor;
 			player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + heal));
 		}
-		if (!resistant || resistanceLevel <= 1) {
+		if (currentLevel <= 0) {
 			player.clearFire();
 			player.setTicksFrozen(0);
 		}
 
-		player.addEffect(new MobEffectInstance(ModEffects.SCP500_RESISTANCE_HOLDER, RESISTANCE_TICKS, resistanceLevel, false, true, true));
+		player.addEffect(new MobEffectInstance(ModEffects.SCP500_RESISTANCE_HOLDER, RESISTANCE_TICKS, nextLevel, false, true, true));
 		level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_DRINK.value(), SoundSource.PLAYERS, 1.0F, 1.2F);
 		level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
 				player.getX(), player.getY() + 1.0D, player.getZ(), 24, 0.5D, 0.8D, 0.5D, 0.02D);
 
-		Scp500Events.CURE.invoker().onCure(player, resistant);
+		Scp500Events.CURE.invoker().onCure(player, currentLevel >= 0);
 
-		Component message = switch (resistanceLevel) {
-			case 0 -> Component.translatable("message.scpmod.scp500.healed", removed);
-			case 1 -> Component.translatable("message.scpmod.scp500.weak", removed);
-			case 2 -> Component.translatable("message.scpmod.scp500.random_two", removed);
-			case 3 -> Component.translatable("message.scpmod.scp500.random_one", removed);
+		Component message = switch (currentLevel) {
+			case -1 -> Component.translatable("message.scpmod.scp500.healed", removed);
+			case 0 -> Component.translatable("message.scpmod.scp500.weak", removed);
+			case 1 -> Component.translatable("message.scpmod.scp500.random_two", removed);
+			case 2 -> Component.translatable("message.scpmod.scp500.random_one", removed);
 			default -> Component.translatable("message.scpmod.scp500.regen");
 		};
 		player.sendSystemMessage(message);
-		ScpMod.LOGGER.info("[scpmod] scp500 used by {} resistant={} level={} cleared={}",
-				player.getName().getString(), resistant, resistanceLevel + 1, removed);
+		ScpMod.LOGGER.info("[scpmod] scp500 used by {} level={} cleared={}",
+				player.getName().getString(), nextLevel + 1, removed);
 	}
 }

@@ -4,6 +4,7 @@ import com.scpmod.ScpMod;
 import com.scpmod.config.AnomalyConfig;
 import com.scpmod.content.ModEntities;
 import com.scpmod.content.ModSounds;
+import com.scpmod.item.ScpDocumentItem;
 import com.scpmod.entity.Scp173Entity;
 
 import net.minecraft.core.BlockPos;
@@ -147,7 +148,7 @@ public final class AnomalyController {
 		boolean observed = isObservedByAnyone(level);
 		if (!observed) {
 			if (now >= nextScrapeTick) {
-				nextScrapeTick = now + 100L + RANDOM.nextInt(100);
+				nextScrapeTick = now + 200L + RANDOM.nextInt(200);
 				level.playSound(null, body.blockPosition(), ModSounds.SCRAPE, SoundSource.AMBIENT, 1.0F, 0.7F);
 			}
 		}
@@ -313,6 +314,7 @@ public final class AnomalyController {
 				BlockHitResult hit = level.clip(new ClipContext(eye, point,
 						ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
 				if (hit.getType() == HitResult.Type.MISS) {
+					ScpDocumentItem.record(player, "scp_173");
 					return true;
 				}
 			}

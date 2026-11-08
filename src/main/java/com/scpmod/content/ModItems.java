@@ -2,6 +2,8 @@ package com.scpmod.content;
 
 import com.scpmod.ScpMod;
 import com.scpmod.item.Scp173SpawnerItem;
+import com.scpmod.item.Scp005Item;
+import com.scpmod.item.ScpDocumentItem;
 import com.scpmod.item.Scp500Item;
 
 import net.minecraft.core.Registry;
@@ -22,6 +24,10 @@ public final class ModItems {
 
 	public static final Item CONTAINMENT_UNIT = registerBlockItem("containment_unit", ModBlocks.CONTAINMENT_UNIT);
 	public static final Item TERMINAL = registerBlockItem("terminal", ModBlocks.TERMINAL);
+	public static final Item SCP_DOCUMENT = registerItem("scp_document",
+			properties -> new ScpDocumentItem(properties.stacksTo(1)));
+	public static final Item SCP_005 = registerItem("scp_005",
+			properties -> new Scp005Item(properties.stacksTo(1)));
 	public static final Item SCP_500 = registerItem("scp_500",
 			properties -> new Scp500Item(properties.stacksTo(59)));
 	public static final Item SCP_173_SPAWNER = registerItem("scp_173_spawner",
@@ -29,7 +35,7 @@ public final class ModItems {
 
 	/** Forces class initialisation (items must be created after blocks are registered). */
 	public static void register() {
-		ScpMod.LOGGER.debug("[scpmod] registered 4 items");
+		ScpMod.LOGGER.debug("[scpmod] registered 6 items");
 	}
 
 	private static Item registerBlockItem(String name, Block block) {

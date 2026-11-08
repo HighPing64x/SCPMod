@@ -2,6 +2,7 @@ package com.scpmod.block;
 
 import com.scpmod.block.entity.ContainmentUnitBlockEntity;
 import com.scpmod.event.BreachEventManager;
+import com.scpmod.item.ScpDocumentItem;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,9 @@ public class ContainmentUnitBlock extends BaseEntityBlock {
 			return InteractionResult.PASS;
 		}
 		if (!level.isClientSide()) {
+			if (!unit.isVacant() && player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+				ScpDocumentItem.record(serverPlayer, unit.containedScp());
+			}
 			if (unit.isVacant()) {
 				player.sendSystemMessage(Component.translatable("message.scpmod.unit.vacant"));
 			} else {

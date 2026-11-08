@@ -50,5 +50,18 @@
 	"message.scpmod.scp500.random_two": "抗药性 II 级：只随机清除了 %s 个负面效果。",
 	"message.scpmod.scp500.random_one": "抗药性 III 级：回血继续减少——只随机清除了 %s 个负面效果。",
 	"message.scpmod.scp500.regen": "抗药性 IV 级：无法瞬间治愈，只获得缓慢的生命恢复效果。",
-	"message.scpmod.scp500.no_effect": "抗药性 V 级：SCP-500 对你已经完全无效了。"
+	"message.scpmod.scp500.no_effect": "抗药性 V 级：SCP-500 对你已经完全无效了。",
+	"item.scpmod.scp_005": "SCP-005 万能钥匙",
+	"scp.scpmod.scp_005": "SCP-005 万能钥匙",
+	"message.scpmod.scp005.no_lock": "这里似乎没有可以打开的锁。",
+	"message.scpmod.scp005.door_unlocked": "钥匙转动，咔哒一声，锁开了。",
+	"message.scpmod.scp005.unit_unlocked": "收容单元的密封被解除了。",
+	"message.scpmod.scp005.unit_breached": "收容单元里的异常被释放了！",
+	"message.scpmod.scp005.terminal_unlocked": "操作终端被解锁了。",
+	"message.scpmod.scp005.already_unlocked": "这里已经是解锁状态。",
+	"message.scpmod.scp005.tag_unlocked": "某种锁被钥匙打开了。",
+	"item.scpmod.scp_document": "SCP 文档（图鉴）",
+	"message.scpmod.document.obtained": "你获得了一本 SCP 文档。",
+	"message.scpmod.document.recorded": "SCP 文档已更新：%s",
+	"message.scpmod.document.all": "SCP 文档已收录全部异常：%s / %s"
 }
