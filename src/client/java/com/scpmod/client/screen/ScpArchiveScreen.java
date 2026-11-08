@@ -13,9 +13,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +40,16 @@ public class ScpArchiveScreen extends Screen {
 	private int selected; // 0 = 使命宣言，1..N = SCP
 	private Scp173Entity previewEntity;
 	private List<String> manifestLines = new ArrayList<>();
-	private boolean draggingModel;
-	private float previewYaw = 180.0F;
-	private float previewPitch;
-	private double lastDragX;
-	private double lastDragY;
 	private float scroll;
+	private float modelAngle;
+	private EntityRenderState previewState;
+	private int lastWidth;
+	private int lastHeight;
+	private long lastFrameNanos;
+	private List<String> descLines = new ArrayList<>();
+	private float descScroll;
+	private float descTargetScroll;
+	private int descFor = -1;
 	private float targetScroll;
 
 	public ScpArchiveScreen(ItemStack document) {
@@ -77,7 +87,7 @@ public class ScpArchiveScreen extends Screen {
 	}
 
 	private int listTop() {
-		return panelY() + 32;
+		return panelY() + 56;
 	}
 
 	private int detailX() {
@@ -85,7 +95,7 @@ public class ScpArchiveScreen extends Screen {
 	}
 
 	private int detailY() {
-		return panelY() + 32;
+		return panelY() + 56;
 	}
 
 	private int detailW() {
@@ -125,6 +135,12 @@ public class ScpArchiveScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+		if (this.lastWidth != this.width || this.lastHeight != this.height) {
+			this.lastWidth = this.width;
+			this.lastHeight = this.height;
+			this.buildManifestLines();
+			this.descFor = -1;
+		}
 		int x0 = panelX();
 		int y0 = panelY();
 		int w = panelW();
@@ -136,18 +152,21 @@ public class ScpArchiveScreen extends Screen {
 		graphics.fill(x0, y0, x0 + 1, y0 + h, 0xFF4B4F57);
 		graphics.fill(x0 + w - 1, y0, x0 + w, y0 + h, 0xFF4B4F57);
 
-		// 标题：SCP [原图 logo] 档案
+		// 标题：SCP [原图 logo] 档案（1.5 倍字号）
 		String left = "SCP";
 		String right = "档案";
-		int logoW = 18;
-		int logoH = 17;
-		int titleW = this.font.width(left) + 5 + logoW + 5 + this.font.width(right);
+		float titleScale = 1.5F;
+		int leftW = (int) (this.font.width(left) * titleScale);
+		int rightW = (int) (this.font.width(right) * titleScale);
+		int logoW = 27;
+		int logoH = 26;
+		int titleW = leftW + 6 + logoW + 6 + rightW;
 		int tx = this.width / 2 - titleW / 2;
-		int ty = y0 + 6;
-		graphics.text(this.font, left, tx, ty + 5, 0xFFE8E8E0);
-		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LOGO, tx + this.font.width(left) + 5, ty, logoW, logoH);
-		graphics.text(this.font, right, tx + this.font.width(left) + 5 + logoW + 5, ty + 5, 0xFFE8E8E0);
-		graphics.fill(x0 + 8, y0 + 28, x0 + w - 8, y0 + 29, 0xFF3A3F47);
+		int ty = y0 + 10;
+		this.bigText(graphics, Component.literal(left), tx, ty + 6, titleScale, 0xFFE8E8E0);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, LOGO, tx + leftW + 6, ty, logoW, logoH);
+		this.bigText(graphics, Component.literal(right), tx + leftW + 6 + logoW + 6, ty + 6, titleScale, 0xFFE8E8E0);
+		graphics.fill(x0 + 8, y0 + 46, x0 + w - 8, y0 + 47, 0xFF3A3F47);
 
 		// 左侧列表：使命宣言 + SCP
 		int rowY = listTop();
@@ -183,8 +202,8 @@ public class ScpArchiveScreen extends Screen {
 			if (Math.abs(this.targetScroll - this.scroll) < 0.5F) {
 				this.scroll = this.targetScroll;
 			}
-			graphics.text(this.font, Component.translatable("screen.scpmod.manifest.title"),
-					detailX, detailY, 0xFFFFFFFF);
+			this.bigText(graphics, Component.translatable("screen.scpmod.manifest.title"),
+					detailX, detailY, 1.5F, 0xFFFFFFFF);
 			int top = detailY + 18;
 			int viewH = detailH() - 24;
 			graphics.enableScissor(detailX, top, detailX + detailW(), top + viewH);
@@ -205,43 +224,128 @@ public class ScpArchiveScreen extends Screen {
 		} else if (this.selected <= this.scps.size()) {
 			ScpDefinition definition = this.scps.get(this.selected - 1);
 			boolean known = this.recorded.contains(definition.id().getPath());
-			graphics.text(this.font, ScpRegistry.displayName(definition.id().getPath()),
-					detailX, detailY, 0xFFFFFFFF);
+			this.bigText(graphics, ScpRegistry.displayName(definition.id().getPath()),
+					detailX, detailY, 1.5F, 0xFFFFFFFF);
 			if (known) {
 				graphics.text(this.font, Component.literal("等级: " + definition.classification()),
 						detailX, detailY + 16, 0xFF9FB4C8);
 				int textX = detailX;
 				int textY = detailY + 34;
 				if ("scp_173".equals(definition.id().getPath())) {
-					int modelX = detailX;
-					int modelY = detailY + 34;
+					int modelX = detailX();
+					int modelY = detailY() + 34;
 					int modelW = 92;
 					int modelH = 118;
 					try {
-						float fakeMouseX = (float) (Math.sin(Math.toRadians(this.previewYaw)) * 40.0D);
-						float fakeMouseY = (float) (-Math.sin(Math.toRadians(this.previewPitch)) * 40.0D);
-						InventoryScreen.extractEntityInInventoryFollowsMouse(graphics,
-								modelX, modelY, modelX + modelW, modelY + modelH, 32, 0.0F,
-								fakeMouseX, fakeMouseY, preview173());
+						if (this.previewState == null) {
+							EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+							this.previewState = dispatcher.extractEntity(preview173(), 1.0F);
+							if (this.previewState instanceof LivingEntityRenderState living) {
+								living.bodyRot = 0.0F;
+								living.yRot = 0.0F;
+								living.xRot = 0.0F;
+								living.scale = 1.0F;
+							}
+						}
+						EntityRenderState state = this.previewState;
+						// 俯视 + 顺时针自动旋转：固定每帧小步进（约 60fps 时 24°/秒），
+						// 不依赖帧时间，避免帧率波动导致的旋转步进抖动。
+						this.modelAngle = (this.modelAngle + 0.4F) % 360.0F;
+						float angle = this.modelAngle;
+						Quaternionf base = new Quaternionf()
+								.rotateY((float) Math.toRadians(angle))
+								.rotateZ((float) Math.PI);
+						Quaternionf tilt = new Quaternionf().rotateX((float) Math.toRadians(-15.0F));
+						Vector3f pivot = new Vector3f(0.0F, state.boundingBoxHeight / 2.0F, 0.0F);
+						graphics.entity(state, 32.0F, pivot, base, tilt,
+								modelX, modelY, modelX + modelW, modelY + modelH);
 					} catch (Throwable throwable) {
 						graphics.item(new ItemStack(ModItems.SCP_173_SPAWNER), modelX + 30, modelY + 40);
 					}
 					textX = detailX + modelW + 10;
-				} else {
+								} else {
 					graphics.item(preview(definition.id().getPath()), detailX, detailY + 40);
 					textX = detailX + 26;
 					textY = detailY + 36;
 				}
 				int textW = panelX() + panelW() - textX - 12;
-				graphics.textWithWordWrap(this.font, Component.translatable(definition.descriptionKey()),
-						textX, textY, textW, 0xFFD0D0C8);
+				this.renderDescription(graphics, definition, textX, textY, textW);
 			} else {
 				graphics.textWithWordWrap(this.font, Component.translatable("screen.scpmod.unknown_hint"),
 						detailX, detailY + 22, detailW(), 0xFF888888);
 			}
 		}
 		graphics.centeredText(this.font, Component.translatable("screen.scpmod.close_hint"),
-				this.width / 2, y0 + h - 14, 0xFF6A6A6A);
+				this.width / 2, y0 + h + 6, 0xFF6A6A6A);
+	}
+
+	/** 放大绘制文字（GUI 栏目标题用）。 */
+	private void bigText(GuiGraphicsExtractor graphics, Component text, int x, int y, float scale, int color) {
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y);
+		graphics.pose().scale(scale, scale);
+		graphics.text(this.font, text, 0, 0, color);
+		graphics.pose().popMatrix();
+	}
+
+	private void renderDescription(GuiGraphicsExtractor graphics, ScpDefinition definition,
+			int textX, int textY, int textW) {
+		if (this.descFor != this.selected) {
+			this.rebuildDescLines(definition, textW);
+		}
+		int bottom = panelY() + panelH() - 30;
+		int viewH = bottom - textY;
+		if (viewH <= 0) {
+			return;
+		}
+		this.descScroll += (this.descTargetScroll - this.descScroll) * 0.35F;
+		if (Math.abs(this.descTargetScroll - this.descScroll) < 0.5F) {
+			this.descScroll = this.descTargetScroll;
+		}
+		graphics.enableScissor(textX, textY, textX + textW, textY + viewH);
+		int lineY = textY - (int) this.descScroll;
+		for (String line : this.descLines) {
+			if (lineY + LINE_H >= textY && lineY <= textY + viewH) {
+				graphics.text(this.font, Component.literal(line), textX, lineY, 0xFFD0D0C8);
+			}
+			lineY += LINE_H;
+		}
+		graphics.disableScissor();
+		int totalH = this.descLines.size() * LINE_H;
+		if (totalH > viewH) {
+			int barX = textX + textW + 4;
+			graphics.fill(barX, textY, barX + 3, textY + viewH, 0xFF2A2E34);
+			int barH = Math.max(16, (int) (viewH * (viewH / (double) totalH)));
+			int maxScroll = Math.max(1, totalH - viewH);
+			int barY = textY + (int) ((viewH - barH) * (this.descScroll / (double) maxScroll));
+			graphics.fill(barX, barY, barX + 3, barY + barH, 0xFF6A7078);
+		}
+	}
+
+	private void rebuildDescLines(ScpDefinition definition, int textW) {
+		this.descLines = new ArrayList<>();
+		String raw = Component.translatable(definition.descriptionKey()).getString();
+		int maxW = Math.max(40, textW);
+		for (String paragraph : raw.split("\n", -1)) {
+			if (paragraph.isEmpty()) {
+				this.descLines.add("");
+				continue;
+			}
+			StringBuilder current = new StringBuilder();
+			for (char c : paragraph.toCharArray()) {
+				if (this.font.width(current.toString() + c) > maxW && current.length() > 0) {
+					this.descLines.add(current.toString());
+					current.setLength(0);
+				}
+				current.append(c);
+			}
+			if (current.length() > 0) {
+				this.descLines.add(current.toString());
+			}
+		}
+		this.descFor = this.selected;
+		this.descScroll = 0.0F;
+		this.descTargetScroll = 0.0F;
 	}
 
 	private Scp173Entity preview173() {
@@ -271,6 +375,16 @@ public class ScpArchiveScreen extends Screen {
 				return true;
 			}
 		}
+		if (this.selected > 0 && this.selected <= this.scps.size()) {
+			if (mouseX >= detailX() && mouseX <= detailX() + detailW()
+					&& mouseY >= detailY() && mouseY <= detailY() + detailH()) {
+				int viewH = panelY() + panelH() - 30 - (detailY() + 36);
+				int maxScroll = Math.max(0, this.descLines.size() * LINE_H - viewH);
+				this.descTargetScroll = Math.max(0.0F,
+						Math.min(maxScroll, this.descTargetScroll - (float) scrollY * 22.0F));
+				return true;
+			}
+		}
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 
@@ -289,38 +403,7 @@ public class ScpArchiveScreen extends Screen {
 				rowY += ROW_H;
 			}
 		}
-		if (event.button() == 0 && this.selected > 0 && this.selected <= this.scps.size()
-				&& "scp_173".equals(this.scps.get(this.selected - 1).id().getPath())) {
-			int modelX = detailX();
-			int modelY = detailY() + 34;
-			if (event.x() >= modelX && event.x() <= modelX + 92
-					&& event.y() >= modelY && event.y() <= modelY + 118) {
-				this.draggingModel = true;
-				this.lastDragX = event.x();
-				this.lastDragY = event.y();
-				return true;
-			}
-		}
 		return super.mouseClicked(event, doubled);
-	}
-
-	@Override
-	public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
-		if (this.draggingModel) {
-			this.previewYaw += (float) (event.x() - this.lastDragX) * 0.8F;
-			this.previewPitch = Math.max(-60.0F, Math.min(60.0F,
-					this.previewPitch + (float) (event.y() - this.lastDragY) * 0.8F));
-			this.lastDragX = event.x();
-			this.lastDragY = event.y();
-			return true;
-		}
-		return super.mouseDragged(event, dragX, dragY);
-	}
-
-	@Override
-	public boolean mouseReleased(MouseButtonEvent event) {
-		this.draggingModel = false;
-		return super.mouseReleased(event);
 	}
 
 	@Override
