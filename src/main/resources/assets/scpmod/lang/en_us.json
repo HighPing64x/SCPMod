@@ -3,7 +3,7 @@
 	"block.scpmod.terminal": "Operation Terminal",
 	"item.scpmod.containment_unit": "Containment Unit",
 	"item.scpmod.terminal": "Operation Terminal",
-	"scp.scpmod.scp_173": "SCP-173",
+	"scp.scpmod.scp_173": "SCP-173 Concrete Statue",
 	"scp.scpmod.unknown": "Unknown Anomaly",
 	"message.scpmod.unit.vacant": "Containment unit is vacant.",
 	"message.scpmod.unit.occupied": "Contained: %s (sealed: %s)",
@@ -74,5 +74,8 @@
 	"message.scpmod.scp005.end_portal_open": "The End Portal is activated.",
 	"message.scpmod.scp005.end_portal_incomplete": "The End Portal frame is incomplete, or is missing Eyes of Ender.",
 	"message.scpmod.scp005.nether_portal_open": "The Nether Portal is lit.",
-	"message.scpmod.scp005.nether_portal_incomplete": "The obsidian frame is incomplete."
+	"message.scpmod.scp005.nether_portal_incomplete": "The obsidian frame is incomplete.",
+	"screen.scpmod.not_recorded": "[not recorded]",
+	"message.scpmod.scp005.end_portal_already": "The End Portal is already activated.",
+	"message.scpmod.scp005.nether_portal_already": "The Nether Portal is already open."
 }

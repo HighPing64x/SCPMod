@@ -3,7 +3,7 @@
 	"block.scpmod.terminal": "操作终端",
 	"item.scpmod.containment_unit": "收容单元",
 	"item.scpmod.terminal": "操作终端",
-	"scp.scpmod.scp_173": "SCP-173",
+	"scp.scpmod.scp_173": "SCP-173 混凝土雕像",
 	"scp.scpmod.unknown": "未知异常",
 	"message.scpmod.unit.vacant": "收容单元是空的。",
 	"message.scpmod.unit.occupied": "收容中：%s（已封闭：%s）",
@@ -74,5 +74,8 @@
 	"message.scpmod.scp005.end_portal_open": "末地传送门被激活了。",
 	"message.scpmod.scp005.end_portal_incomplete": "末地传送门结构不完整，或缺少末影之眼。",
 	"message.scpmod.scp005.nether_portal_open": "下界传送门被点燃了。",
-	"message.scpmod.scp005.nether_portal_incomplete": "黑曜石框架不完整。"
+	"message.scpmod.scp005.nether_portal_incomplete": "黑曜石框架不完整。",
+	"screen.scpmod.not_recorded": "[未收录]",
+	"message.scpmod.scp005.end_portal_already": "末地传送门已经激活了。",
+	"message.scpmod.scp005.nether_portal_already": "下界传送门已经开启了。"
 }

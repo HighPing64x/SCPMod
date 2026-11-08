@@ -64,22 +64,26 @@ public class Scp005Item extends Item {
 			return InteractionResult.SUCCESS;
 		}
 
-		// 末地传送门框架：结构完整（12 框 + 全部末影之眼）时激活传送门。
+		// 末地传送门框架：12 框结构完整即可激活（万能钥匙可直接补眼/激活）。
 		if (state.is(Blocks.END_PORTAL_FRAME)) {
-			if (tryActivateEndPortal(player, serverLevel, pos)) {
-				finish(serverLevel, player, stack, pos);
-			} else {
-				player.sendSystemMessage(Component.translatable("message.scpmod.scp005.end_portal_incomplete"));
+			switch (tryActivateEndPortal(player, serverLevel, pos)) {
+				case OPENED -> finish(serverLevel, player, stack, pos);
+				case ALREADY_OPEN -> player.sendSystemMessage(
+						Component.translatable("message.scpmod.scp005.end_portal_already"));
+				case INVALID -> player.sendSystemMessage(
+						Component.translatable("message.scpmod.scp005.end_portal_incomplete"));
 			}
 			return InteractionResult.SUCCESS;
 		}
 
 		// 黑曜石：完整 4x5 框架时点燃下界传送门。
 		if (state.is(Blocks.OBSIDIAN)) {
-			if (tryActivateNetherPortal(player, serverLevel, pos)) {
-				finish(serverLevel, player, stack, pos);
-			} else {
-				player.sendSystemMessage(Component.translatable("message.scpmod.scp005.nether_portal_incomplete"));
+			switch (tryActivateNetherPortal(player, serverLevel, pos)) {
+				case OPENED -> finish(serverLevel, player, stack, pos);
+				case ALREADY_OPEN -> player.sendSystemMessage(
+						Component.translatable("message.scpmod.scp005.nether_portal_already"));
+				case INVALID -> player.sendSystemMessage(
+						Component.translatable("message.scpmod.scp005.nether_portal_incomplete"));
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -133,17 +137,49 @@ public class Scp005Item extends Item {
 		return InteractionResult.SUCCESS;
 	}
 
-	/** 末地传送门：12 个框架（全部带眼）围成 5x5 环时，在中心 3x3 生成传送门。 */
-	private static boolean tryActivateEndPortal(ServerPlayer player, ServerLevel level, BlockPos clicked) {
+	private enum PortalResult { OPENED, ALREADY_OPEN, INVALID }
+
+	/** 末地传送门：12 个框架围成 5x5 环即可激活；钥匙会顺手补上缺失的末影之眼。 */
+	private static PortalResult tryActivateEndPortal(ServerPlayer player, ServerLevel level, BlockPos clicked) {
 		for (int dx = -2; dx <= 2; dx++) {
 			for (int dz = -2; dz <= 2; dz++) {
-				boolean edge = (Math.abs(dx) == 2 || Math.abs(dz) == 2) && !(Math.abs(dx) == 2 && Math.abs(dz) == 2);
-				if (!edge) {
+				if (!isRingOffset(dx, dz)) {
 					continue;
 				}
 				BlockPos center = clicked.offset(-dx, 0, -dz);
-				if (!isCompleteEndPortal(level, center)) {
+				if (!isEndPortalFrameRing(level, center)) {
 					continue;
+				}
+				boolean already = false;
+				boolean clear = true;
+				for (int ix = -1; ix <= 1; ix++) {
+					for (int iz = -1; iz <= 1; iz++) {
+						BlockState inner = level.getBlockState(center.offset(ix, 0, iz));
+						if (inner.is(Blocks.END_PORTAL)) {
+							already = true;
+						} else if (!inner.isAir()) {
+							clear = false;
+						}
+					}
+				}
+				if (already) {
+					return PortalResult.ALREADY_OPEN;
+				}
+				if (!clear) {
+					continue;
+				}
+				// 钥匙“万能”，自动补上缺失的末影之眼。
+				for (int fx = -2; fx <= 2; fx++) {
+					for (int fz = -2; fz <= 2; fz++) {
+						if (!isRingOffset(fx, fz)) {
+							continue;
+						}
+						BlockState frame = level.getBlockState(center.offset(fx, 0, fz));
+						if (frame.is(Blocks.END_PORTAL_FRAME) && !frame.getValue(EndPortalFrameBlock.HAS_EYE)) {
+							level.setBlock(center.offset(fx, 0, fz),
+									frame.setValue(EndPortalFrameBlock.HAS_EYE, true), Block.UPDATE_ALL);
+						}
+					}
 				}
 				for (int ix = -1; ix <= 1; ix++) {
 					for (int iz = -1; iz <= 1; iz++) {
@@ -152,28 +188,23 @@ public class Scp005Item extends Item {
 				}
 				level.playSound(null, center, SoundEvents.END_PORTAL_SPAWN, SoundSource.BLOCKS, 1.0F, 1.0F);
 				player.sendSystemMessage(Component.translatable("message.scpmod.scp005.end_portal_open"));
-				return true;
+				return PortalResult.OPENED;
 			}
 		}
-		return false;
+		return PortalResult.INVALID;
 	}
 
-	private static boolean isCompleteEndPortal(ServerLevel level, BlockPos center) {
+	private static boolean isRingOffset(int dx, int dz) {
+		return (Math.abs(dx) == 2 || Math.abs(dz) == 2) && !(Math.abs(dx) == 2 && Math.abs(dz) == 2);
+	}
+
+	private static boolean isEndPortalFrameRing(ServerLevel level, BlockPos center) {
 		for (int dx = -2; dx <= 2; dx++) {
 			for (int dz = -2; dz <= 2; dz++) {
-				boolean edge = (Math.abs(dx) == 2 || Math.abs(dz) == 2) && !(Math.abs(dx) == 2 && Math.abs(dz) == 2);
-				if (!edge) {
+				if (!isRingOffset(dx, dz)) {
 					continue;
 				}
-				BlockState state = level.getBlockState(center.offset(dx, 0, dz));
-				if (!state.is(Blocks.END_PORTAL_FRAME) || !state.getValue(EndPortalFrameBlock.HAS_EYE)) {
-					return false;
-				}
-			}
-		}
-		for (int dx = -1; dx <= 1; dx++) {
-			for (int dz = -1; dz <= 1; dz++) {
-				if (!level.getBlockState(center.offset(dx, 0, dz)).isAir()) {
+				if (!level.getBlockState(center.offset(dx, 0, dz)).is(Blocks.END_PORTAL_FRAME)) {
 					return false;
 				}
 			}
@@ -181,33 +212,44 @@ public class Scp005Item extends Item {
 		return true;
 	}
 
-	/** 下界传送门：4x5 黑曜石框架 + 内部 2x3 空间时点燃。 */
-	private static boolean tryActivateNetherPortal(ServerPlayer player, ServerLevel level, BlockPos clicked) {
+	/** 下界传送门：4x5 黑曜石框架 + 内部 2x3 空间时点燃；已开启则返回 ALREADY_OPEN。 */
+	private static PortalResult tryActivateNetherPortal(ServerPlayer player, ServerLevel level, BlockPos clicked) {
 		for (boolean alongX : new boolean[] { true, false }) {
 			for (int ox = -3; ox <= 0; ox++) {
 				for (int oy = -4; oy <= 0; oy++) {
 					BlockPos base = clicked.offset(alongX ? ox : 0, oy, alongX ? 0 : ox);
-					if (!isCompleteNetherFrame(level, base, alongX)) {
+					if (!isNetherFrame(level, base, alongX)) {
 						continue;
+					}
+					boolean already = false;
+					for (int w = 1; w <= 2; w++) {
+						for (int h = 1; h <= 3; h++) {
+							if (level.getBlockState(base.offset(alongX ? w : 0, h, alongX ? 0 : w)).is(Blocks.NETHER_PORTAL)) {
+								already = true;
+							}
+						}
+					}
+					if (already) {
+						return PortalResult.ALREADY_OPEN;
 					}
 					Direction.Axis axis = alongX ? Direction.Axis.X : Direction.Axis.Z;
 					for (int w = 1; w <= 2; w++) {
 						for (int h = 1; h <= 3; h++) {
-							BlockPos portal = base.offset(alongX ? w : 0, h, alongX ? 0 : w);
-							level.setBlock(portal, Blocks.NETHER_PORTAL.defaultBlockState()
-									.setValue(NetherPortalBlock.AXIS, axis), Block.UPDATE_ALL);
+							level.setBlock(base.offset(alongX ? w : 0, h, alongX ? 0 : w),
+									Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, axis),
+									Block.UPDATE_ALL);
 						}
 					}
 					level.playSound(null, base, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
 					player.sendSystemMessage(Component.translatable("message.scpmod.scp005.nether_portal_open"));
-					return true;
+					return PortalResult.OPENED;
 				}
 			}
 		}
-		return false;
+		return PortalResult.INVALID;
 	}
 
-	private static boolean isCompleteNetherFrame(ServerLevel level, BlockPos base, boolean alongX) {
+	private static boolean isNetherFrame(ServerLevel level, BlockPos base, boolean alongX) {
 		for (int w = 0; w < 4; w++) {
 			for (int h = 0; h < 5; h++) {
 				BlockPos pos = base.offset(alongX ? w : 0, h, alongX ? 0 : w);
@@ -217,7 +259,7 @@ public class Scp005Item extends Item {
 					if (!state.is(Blocks.OBSIDIAN)) {
 						return false;
 					}
-				} else if (!state.isAir()) {
+				} else if (!state.isAir() && !state.is(Blocks.NETHER_PORTAL)) {
 					return false;
 				}
 			}
