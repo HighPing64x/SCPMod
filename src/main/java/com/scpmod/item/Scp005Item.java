@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -24,11 +25,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.EndPortalFrameBlock;
+import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * SCP-005 万能钥匙：右键方块尝试开锁。
@@ -72,6 +75,27 @@ public class Scp005Item extends Item {
 						Component.translatable("message.scpmod.scp005.end_portal_already"));
 				case INVALID -> player.sendSystemMessage(
 						Component.translatable("message.scpmod.scp005.end_portal_incomplete"));
+			}
+			return InteractionResult.SUCCESS;
+		}
+
+		// 末地折跃门：距离足够近时直接进入（传送到折跃门出口）。
+		if (state.is(Blocks.END_GATEWAY)) {
+			double distance = player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+			if (distance > 16.0D) {
+				player.sendSystemMessage(Component.translatable("message.scpmod.scp005.gateway_too_far"));
+			} else if (serverLevel.getBlockEntity(pos) instanceof TheEndGatewayBlockEntity gateway) {
+				if (gateway.isCoolingDown()) {
+					player.sendSystemMessage(Component.translatable("message.scpmod.scp005.gateway_cooling"));
+				} else {
+					Vec3 exit = gateway.getPortalPosition(serverLevel, pos);
+					if (exit != null) {
+						gateway.triggerEvent(1, 0);
+						player.teleportTo(serverLevel, exit.x, exit.y, exit.z, java.util.Set.of(), player.getYRot(), player.getXRot(), false);
+						player.sendSystemMessage(Component.translatable("message.scpmod.scp005.gateway_entered"));
+						finish(serverLevel, player, stack, pos);
+					}
+				}
 			}
 			return InteractionResult.SUCCESS;
 		}

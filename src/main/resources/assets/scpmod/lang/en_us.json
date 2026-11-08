@@ -77,5 +77,12 @@
 	"message.scpmod.scp005.nether_portal_incomplete": "The obsidian frame is incomplete.",
 	"screen.scpmod.not_recorded": "[not recorded]",
 	"message.scpmod.scp005.end_portal_already": "The End Portal is already activated.",
-	"message.scpmod.scp005.nether_portal_already": "The Nether Portal is already open."
+	"message.scpmod.scp005.nether_portal_already": "The Nether Portal is already open.",
+	"screen.scpmod.motto": "Humanity can no longer live in fear. Nothing can protect us - we must protect ourselves. We Secure. We Contain. We Protect. - The Administrator",
+	"message.scpmod.scp005.gateway_too_far": "You are too far from the End Gateway (must be within 4 blocks).",
+	"message.scpmod.scp005.gateway_cooling": "The End Gateway is still cooling down.",
+	"message.scpmod.scp005.gateway_entered": "The End Gateway teleports you away.",
+	"screen.scpmod.motto.full": "Humanity has existed for 250,000 years, but only the last 4,000 of them have been meaningful. We Secure. We Contain. We Protect.\n\nMission Statement: Operating in the shadows around the world, the Foundation's goal is to contain anomalous objects, entities and phenomena. We maintain normalcy so that the rest of humanity can live in an ordinary, rational world.",
+	"screen.scpmod.manifest.title": "MISSION STATEMENT",
+	"screen.scpmod.manifest.hint": "(scroll to turn pages)"
 }

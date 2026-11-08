@@ -35,7 +35,22 @@ public final class ScpRegistry {
 	}
 
 	public static ScpDefinition get(String id) {
-		return id == null || id.isEmpty() ? null : get(Identifier.tryParse(id));
+		if (id == null || id.isEmpty()) {
+			return null;
+		}
+		Identifier parsed = Identifier.tryParse(id);
+		if (parsed == null) {
+			return null;
+		}
+		ScpDefinition definition = get(parsed);
+		if (definition != null) {
+			return definition;
+		}
+		// 允许只传 path（例如 "scp_173"），默认补上 scpmod 命名空间。
+		if ("minecraft".equals(parsed.getNamespace())) {
+			return get(ScpMod.id(parsed.getPath()));
+		}
+		return null;
 	}
 
 	public static Collection<ScpDefinition> all() {
