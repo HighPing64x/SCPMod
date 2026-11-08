@@ -362,6 +362,7 @@ public class ScpArchiveScreen extends Screen {
 		return switch (path) {
 			case "scp_500" -> new ItemStack(ModItems.SCP_500);
 			case "scp_005" -> new ItemStack(ModItems.SCP_005);
+			case "scp_006" -> new ItemStack(ModItems.SCP_006_BUCKET);
 			default -> new ItemStack(ModItems.SCP_DOCUMENT);
 		};
 	}

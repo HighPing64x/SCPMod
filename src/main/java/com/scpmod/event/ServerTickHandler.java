@@ -15,6 +15,7 @@ public final class ServerTickHandler {
 				AnomalyController.ensureAdopted(level);
 			}
 			AnomalyController.tick();
+			Scp006Handler.tick(server);
 		});
 	}
 }

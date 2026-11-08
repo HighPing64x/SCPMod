@@ -84,5 +84,11 @@
 	"message.scpmod.scp005.gateway_entered": "The End Gateway teleports you away.",
 	"screen.scpmod.motto.full": "Humanity has existed for 250,000 years, but only the last 4,000 of them have been meaningful. We Secure. We Contain. We Protect.\n\nMission Statement: Operating in the shadows around the world, the Foundation's goal is to contain anomalous objects, entities and phenomena. We maintain normalcy so that the rest of humanity can live in an ordinary, rational world.",
 	"screen.scpmod.manifest.title": "MISSION STATEMENT",
-	"screen.scpmod.manifest.hint": "(scroll to turn pages)"
+	"screen.scpmod.manifest.hint": "(scroll to turn pages)",
+	"item.scpmod.scp_006_bucket": "SCP-006 Bucket",
+	"item.scpmod.scp_006_bottle": "SCP-006 Bottle",
+	"scp.scpmod.scp_006": "SCP-006 Fountain of Youth",
+	"scp.scpmod.scp_006.desc": "Special Containment Procedures:\nSCP-006 is a small spring. Its existence and properties must be kept secret. Personnel handling it physically must wear Class VI hazmat suits, and any direct skin contact triggers containment procedure 006-Xi-12 (considered a high-level biohazard leak). Any attempt to obtain a liquid sample requires the approval of three O5-level personnel.\n\nDescription:\nSCP-006 is a small spring about 60 km west of Astrakhan. Ingesting its liquid produces the following effects: the ability to fully replicate DNA repair, significantly accelerated cell division, greatly improved tissue repair, and a massive increase in immune system efficiency. In animal tests, injected harmful bacteria and viruses were destroyed immediately. Most reptiles and birds are unaffected by the liquid, while higher primates show symptoms identical to humans.",
+	"message.scpmod.scp006.drink": "You drink the SCP-006 water. You feel healthier.",
+	"message.scpmod.scp006.bottle_collected": "You filled a bottle with SCP-006."
 }

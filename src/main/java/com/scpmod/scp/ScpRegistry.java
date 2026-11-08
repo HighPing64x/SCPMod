@@ -23,6 +23,7 @@ public final class ScpRegistry {
 		register(new ScpDefinition(ScpMod.id("scp_500"), "scp.scpmod.scp_500", "scp.scpmod.scp_500.desc", 1, "Safe"));
 		// SCP-005: skeleton key (Safe).
 		register(new ScpDefinition(ScpMod.id("scp_005"), "scp.scpmod.scp_005", "scp.scpmod.scp_005.desc", 1, "Safe"));
+		register(new ScpDefinition(ScpMod.id("scp_006"), "scp.scpmod.scp_006", "scp.scpmod.scp_006.desc", 1, "Safe"));
 	}
 
 	public static ScpDefinition register(ScpDefinition definition) {

@@ -1,6 +1,7 @@
 package com.scpmod.content;
 
 import com.scpmod.ScpMod;
+import com.scpmod.item.Scp006BottleItem;
 import com.scpmod.item.Scp173SpawnerItem;
 import com.scpmod.item.Scp005Item;
 import com.scpmod.item.ScpDocumentItem;
@@ -12,6 +13,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
@@ -30,12 +32,16 @@ public final class ModItems {
 			properties -> new Scp005Item(properties.stacksTo(1)));
 	public static final Item SCP_500 = registerItem("scp_500",
 			properties -> new Scp500Item(properties.stacksTo(59)));
+	public static final Item SCP_006_BUCKET = registerItem("scp_006_bucket",
+			properties -> new BucketItem(ModFluids.SCP_006, properties.stacksTo(1)));
+	public static final Item SCP_006_BOTTLE = registerItem("scp_006_bottle",
+			properties -> new Scp006BottleItem(properties.stacksTo(1)));
 	public static final Item SCP_173_SPAWNER = registerItem("scp_173_spawner",
 			properties -> new Scp173SpawnerItem(properties.stacksTo(1)));
 
 	/** Forces class initialisation (items must be created after blocks are registered). */
 	public static void register() {
-		ScpMod.LOGGER.debug("[scpmod] registered 6 items");
+		ScpMod.LOGGER.debug("[scpmod] registered 8 items");
 	}
 
 	private static Item registerBlockItem(String name, Block block) {

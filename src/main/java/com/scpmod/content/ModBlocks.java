@@ -2,6 +2,7 @@ package com.scpmod.content;
 
 import com.scpmod.ScpMod;
 import com.scpmod.block.ContainmentUnitBlock;
+import com.scpmod.block.Scp006LiquidBlock;
 import com.scpmod.block.TerminalBlock;
 
 import net.minecraft.core.Registry;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 
 import java.util.function.Function;
 
@@ -32,6 +34,10 @@ public final class ModBlocks {
 			BlockBehaviour.Properties.of().strength(6.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
 	public static final Block TERMINAL = register("terminal", TerminalBlock::new,
 			BlockBehaviour.Properties.of().strength(4.0F, 1200.0F).sound(SoundType.METAL).noOcclusion());
+	public static final Block SCP_006 = register("scp_006",
+			properties -> new Scp006LiquidBlock((net.minecraft.world.level.material.FlowingFluid) ModFluids.SCP_006,
+					properties.noCollision().strength(100.0F).pushReaction(PushReaction.DESTROY).noLootTable()),
+			BlockBehaviour.Properties.of());
 
 	/** Forces class initialisation order (blocks must exist before items reference them). */
 	public static void register() {
