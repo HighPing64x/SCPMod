@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
+import net.minecraft.world.level.levelgen.blockpredicates.TrueBlockPredicate;
 import net.minecraft.world.level.levelgen.feature.LakeFeature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -33,8 +34,12 @@ public class Scp006LakeStructure extends Structure {
 	protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
 		return onTopOfChunkCenter(context, Heightmap.Types.WORLD_SURFACE_WG, builder -> {
 			ChunkPos chunkPos = context.chunkPos();
-			int y = getLowestY(context, 16, 16);
-			builder.addPiece(new Scp006LakePiece(new BlockPos(chunkPos.getMinBlockX() + 8, y, chunkPos.getMinBlockZ() + 8),
+			// 用锚点所在方块的地表高度（而不是区块内最低点），并抬高 1 格：
+			// 湖泊算法会从 origin 向下挖出封闭池，这样生成的池子会开在地表、露天可见。
+			int y = context.chunkGenerator().getFirstOccupiedHeight(chunkPos.getMiddleBlockX(),
+					chunkPos.getMiddleBlockZ(), Heightmap.Types.WORLD_SURFACE_WG,
+					context.heightAccessor(), context.randomState());
+			builder.addPiece(new Scp006LakePiece(new BlockPos(chunkPos.getMiddleBlockX(), y, chunkPos.getMiddleBlockZ()),
 					context.seed()));
 		});
 	}
@@ -50,8 +55,8 @@ public class Scp006LakeStructure extends Structure {
 		return new LakeFeature.Configuration(
 				BlockStateProvider.simple(fluid),
 				BlockStateProvider.simple(Blocks.STONE),
-				BlockPredicate.allOf(),
-				BlockPredicate.allOf(),
-				BlockPredicate.allOf());
+				TrueBlockPredicate.INSTANCE,
+				TrueBlockPredicate.INSTANCE,
+				TrueBlockPredicate.INSTANCE);
 	}
 }

@@ -95,5 +95,8 @@
 	"command.scpmod.locate.scp006.found": "Nearest Fountain of Youth: %s, %s, %s (%s blocks away)",
 	"command.scpmod.locate.scp006.not_found": "No Fountain of Youth found in loaded chunks nearby.",
 	"command.scpmod.locate.station.found": "Nearest SCP Station: %s, %s, %s (%s blocks away)",
-	"command.scpmod.locate.station.not_found": "No SCP Station found nearby."
+	"command.scpmod.locate.station.not_found": "No SCP Station found nearby.",
+	"structure.scpmod.scp_006_lake": "Fountain of Youth",
+	"structure.scpmod.scp_jigsaw_station": "SCP Containment Station",
+	"structure.scpmod.scp_station": "SCP Containment Station"
 }

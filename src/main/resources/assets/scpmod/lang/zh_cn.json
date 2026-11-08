@@ -95,5 +95,8 @@
 	"command.scpmod.locate.scp006.found": "最近的不老泉：%s, %s, %s（距离 %s 格）",
 	"command.scpmod.locate.scp006.not_found": "附近已加载区块中没有找到不老泉。",
 	"command.scpmod.locate.station.found": "最近的 SCP 收容站点：%s, %s, %s（距离 %s 格）",
-	"command.scpmod.locate.station.not_found": "附近没有找到 SCP 收容站点。"
+	"command.scpmod.locate.station.not_found": "附近没有找到 SCP 收容站点。",
+	"structure.scpmod.scp_006_lake": "不老泉",
+	"structure.scpmod.scp_jigsaw_station": "SCP 收容站点",
+	"structure.scpmod.scp_station": "SCP 收容站点"
 }

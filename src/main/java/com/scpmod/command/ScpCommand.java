@@ -94,7 +94,11 @@ public final class ScpCommand {
 										.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_500,
 												IntegerArgumentType.getInteger(context, "count"))))))
 						.then(Commands.literal("scp_005")
-								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_005, 1)))))
+								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_005, 1))))
+						.then(Commands.literal("scp_006_bucket")
+								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_006_BUCKET, 1)))
+						.then(Commands.literal("scp_006_bottle")
+								.executes(context -> giveItem(context, new ItemStack(ModItems.SCP_006_BOTTLE, 1))))))
 				.then(Commands.literal("look").executes(context -> {
 					ServerPlayer player = context.getSource().getPlayerOrException();
 					HitResult hit = player.pick(6.0D, 0.0F, false);
