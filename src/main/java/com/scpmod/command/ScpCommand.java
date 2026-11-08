@@ -1,6 +1,7 @@
 package com.scpmod.command;
 
 import com.scpmod.config.AnomalyConfig;
+import com.scpmod.content.ModBlocks;
 import com.scpmod.content.ModItems;
 import com.scpmod.item.ScpDocumentItem;
 import com.scpmod.config.EventConfig;
@@ -20,6 +21,12 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,6 +48,7 @@ public final class ScpCommand {
 		return hit instanceof BlockHitResult blockHit ? blockHit.getBlockPos() : null;
 	}
 
+	/** 定位最近的 SCP-006 不老泉（只搜索已加载区块内的液体方块）。 */
 	private static int giveItem(CommandContext<CommandSourceStack> context, ItemStack stack) {
 		try {
 			ServerPlayer player = context.getSource().getPlayerOrException();

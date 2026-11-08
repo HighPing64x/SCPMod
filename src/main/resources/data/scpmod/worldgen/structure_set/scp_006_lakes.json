@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 2406006,
+    "separation": 300,
+    "spacing": 1400
+  },
+  "structures": [
+    {
+      "structure": "scpmod:scp_006_lake",
+      "weight": 1
+    }
+  ]
+}

@@ -21,11 +21,8 @@ import com.scpmod.scp.ScpRegistry;
 import com.scpmod.structure.StructureDiagnostics;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageType;
@@ -65,9 +62,6 @@ public class ScpMod implements ModInitializer {
 		StructureDiagnostics.register();
 		BreachEventManager.init();
 		Scp006Events.register();
-		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
-				GenerationStep.Decoration.LAKES,
-				ResourceKey.create(Registries.PLACED_FEATURE, ScpMod.id("scp006_lake")));
 		// 玩家重生时重置异常的目标状态（保证重生保护从重生瞬间开始计时）。
 		ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> AnomalyController.noteRespawn(newPlayer));
 

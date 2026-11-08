@@ -24,7 +24,8 @@ Write-Host 'Starting dev server (this can take 1-6 minutes)...'
 $job = Start-Job -ArgumentList $root, $gradle, $consoleLog -ScriptBlock {
   param($workDir, $gradlePath, $outFile)
   Set-Location $workDir
-  & $gradlePath --no-daemon --console=plain runServer *> $outFile
+  # 代理关闭时使用缓存依赖（首次构建需要联网）
+  & $gradlePath --no-daemon --console=plain --offline runServer *> $outFile
 }
 
 $checks = [ordered]@{

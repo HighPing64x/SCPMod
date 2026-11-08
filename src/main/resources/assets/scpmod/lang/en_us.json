@@ -3,7 +3,7 @@
 	"block.scpmod.terminal": "Operation Terminal",
 	"item.scpmod.containment_unit": "Containment Unit",
 	"item.scpmod.terminal": "Operation Terminal",
-	"scp.scpmod.scp_173": "SCP-173 Concrete Statue",
+	"scp.scpmod.scp_173": "SCP-173 Statue",
 	"scp.scpmod.unknown": "Unknown Anomaly",
 	"message.scpmod.unit.vacant": "Containment unit is vacant.",
 	"message.scpmod.unit.occupied": "Contained: %s (sealed: %s)",
@@ -90,5 +90,10 @@
 	"scp.scpmod.scp_006": "SCP-006 Fountain of Youth",
 	"scp.scpmod.scp_006.desc": "Special Containment Procedures:\nSCP-006 is a small spring. Its existence and properties must be kept secret. Personnel handling it physically must wear Class VI hazmat suits, and any direct skin contact triggers containment procedure 006-Xi-12 (considered a high-level biohazard leak). Any attempt to obtain a liquid sample requires the approval of three O5-level personnel.\n\nDescription:\nSCP-006 is a small spring about 60 km west of Astrakhan. Ingesting its liquid produces the following effects: the ability to fully replicate DNA repair, significantly accelerated cell division, greatly improved tissue repair, and a massive increase in immune system efficiency. In animal tests, injected harmful bacteria and viruses were destroyed immediately. Most reptiles and birds are unaffected by the liquid, while higher primates show symptoms identical to humans.",
 	"message.scpmod.scp006.drink": "You drink the SCP-006 water. You feel healthier.",
-	"message.scpmod.scp006.bottle_collected": "You filled a bottle with SCP-006."
+	"message.scpmod.scp006.bottle_collected": "You filled a bottle with SCP-006.",
+	"command.scpmod.locate.usage": "Usage: /scp locate scp006 | /scp locate station",
+	"command.scpmod.locate.scp006.found": "Nearest Fountain of Youth: %s, %s, %s (%s blocks away)",
+	"command.scpmod.locate.scp006.not_found": "No Fountain of Youth found in loaded chunks nearby.",
+	"command.scpmod.locate.station.found": "Nearest SCP Station: %s, %s, %s (%s blocks away)",
+	"command.scpmod.locate.station.not_found": "No SCP Station found nearby."
 }
