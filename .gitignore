@@ -33,3 +33,6 @@ replay_pid*.log
 
 # stray literal env-var dirs (created by a mis-expanded shell command)
 %SystemDrive%/
+
+# 本地知识库/记忆（不进入仓库）
+memory/
