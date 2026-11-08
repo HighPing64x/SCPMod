@@ -35,9 +35,7 @@ public class ScpDocumentItem extends Item {
 
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
-		if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
-			show(serverPlayer, serverPlayer.getItemInHand(hand));
-		}
+		// 客户端界面由 ScpModClient 的 UseItemCallback 打开。
 		return InteractionResult.SUCCESS;
 	}
 

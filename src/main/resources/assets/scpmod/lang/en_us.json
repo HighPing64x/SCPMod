@@ -60,8 +60,19 @@
 	"message.scpmod.scp005.terminal_unlocked": "The operation terminal has been unlocked.",
 	"message.scpmod.scp005.already_unlocked": "This is already unlocked.",
 	"message.scpmod.scp005.tag_unlocked": "Some kind of lock clicks open.",
-	"item.scpmod.scp_document": "SCP Document (Codex)",
-	"message.scpmod.document.obtained": "You obtained an SCP Document.",
-	"message.scpmod.document.recorded": "SCP Document updated: %s",
-	"message.scpmod.document.all": "SCP Document completed: %s / %s"
+	"item.scpmod.scp_document": "SCP Archive",
+	"message.scpmod.document.obtained": "You obtained an SCP Archive.",
+	"message.scpmod.document.recorded": "SCP Archive updated: %s",
+	"message.scpmod.document.all": "SCP Archive completed: %s / %s",
+	"screen.scpmod.archive": "SCP Archive",
+	"screen.scpmod.unknown": "???",
+	"screen.scpmod.unknown_hint": "Not recorded yet. Encounter this anomaly in the world to add it automatically.",
+	"screen.scpmod.close_hint": "Press ESC to close",
+	"scp.scpmod.scp_173.desc": "A statue made of concrete and rebar. It cannot move while directly observed; unwatched, it closes in at extreme speed and snaps the target's neck.",
+	"scp.scpmod.scp_500.desc": "A small tin of red pills that cures almost any disease or debuff. Repeated use builds up tiered resistance.",
+	"scp.scpmod.scp_005.desc": "An ornate brass key that opens any lock. It can also activate complete End Portals and light complete Nether Portal frames.",
+	"message.scpmod.scp005.end_portal_open": "The End Portal is activated.",
+	"message.scpmod.scp005.end_portal_incomplete": "The End Portal frame is incomplete, or is missing Eyes of Ender.",
+	"message.scpmod.scp005.nether_portal_open": "The Nether Portal is lit.",
+	"message.scpmod.scp005.nether_portal_incomplete": "The obsidian frame is incomplete."
 }

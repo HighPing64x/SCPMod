@@ -60,8 +60,19 @@
 	"message.scpmod.scp005.terminal_unlocked": "操作终端被解锁了。",
 	"message.scpmod.scp005.already_unlocked": "这里已经是解锁状态。",
 	"message.scpmod.scp005.tag_unlocked": "某种锁被钥匙打开了。",
-	"item.scpmod.scp_document": "SCP 文档（图鉴）",
-	"message.scpmod.document.obtained": "你获得了一本 SCP 文档。",
-	"message.scpmod.document.recorded": "SCP 文档已更新：%s",
-	"message.scpmod.document.all": "SCP 文档已收录全部异常：%s / %s"
+	"item.scpmod.scp_document": "SCP 档案",
+	"message.scpmod.document.obtained": "你获得了一本 SCP 档案。",
+	"message.scpmod.document.recorded": "SCP 档案已更新：%s",
+	"message.scpmod.document.all": "SCP 档案已收录全部异常：%s / %s",
+	"screen.scpmod.archive": "SCP 档案",
+	"screen.scpmod.unknown": "???",
+	"screen.scpmod.unknown_hint": "尚未收录。在游戏中遇到该异常后会自动记录。",
+	"screen.scpmod.close_hint": "按 ESC 关闭",
+	"scp.scpmod.scp_173.desc": "一尊混凝土与钢筋制成的雕像。被直接注视时无法移动；无人注视时会以极快速度靠近并折断目标颈部。",
+	"scp.scpmod.scp_500.desc": "一小罐红色药片，可治愈几乎所有疾病与负面状态；连续服用会产生逐级抗药性。",
+	"scp.scpmod.scp_005.desc": "一把装饰华丽的黄铜钥匙，能打开任何形式的锁；也可用于开启结构完整的末地传送门与下界传送门。",
+	"message.scpmod.scp005.end_portal_open": "末地传送门被激活了。",
+	"message.scpmod.scp005.end_portal_incomplete": "末地传送门结构不完整，或缺少末影之眼。",
+	"message.scpmod.scp005.nether_portal_open": "下界传送门被点燃了。",
+	"message.scpmod.scp005.nether_portal_incomplete": "黑曜石框架不完整。"
 }
