@@ -16,6 +16,10 @@ public final class Scp006Handler {
 	private Scp006Handler() {
 	}
 
+	private static boolean isScp006(FluidState fluid) {
+		return fluid.getType() == ModFluids.SCP_006 || fluid.getType() == ModFluids.SCP_006_FLOWING;
+	}
+
 	public static void tick(MinecraftServer server) {
 		if (++counter % 20 != 0) {
 			return;
@@ -24,8 +28,12 @@ public final class Scp006Handler {
 			if (player.isSpectator()) {
 				continue;
 			}
-			FluidState fluid = player.level().getFluidState(player.blockPosition());
-			if (fluid.getType() == ModFluids.SCP_006 || fluid.getType() == ModFluids.SCP_006_FLOWING) {
+			// 液体只占下方部分，玩家站在齐腰深的水里时 blockPosition() 可能是空气，
+			// 因此同时检测脚部与腿部高度。
+			boolean inFluid = isScp006(player.level().getFluidState(player.blockPosition()))
+					|| isScp006(player.level().getFluidState(
+							player.blockPosition().below()));
+			if (inFluid) {
 				player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0, false, true, true));
 				ScpDocumentItem.record(player, "scp_006");
 			}
