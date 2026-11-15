@@ -50,11 +50,12 @@ public class Scp131Model extends EntityModel<Scp131RenderState> {
 		main.addOrReplaceChild("body", CubeListBuilder.create()
 				.texOffs(0, 0).addBox(-3.0F, -7.0F, -3.0F, 6.0F, 6.0F, 6.0F, new CubeDeformation(0.0F)),
 				PartPose.offset(0.0F, 0.0F, 0.0F));
-		// 底部轮座：从 1 格高向上延伸为 2 格高（y=-2..0），上半截插进本体内部，
-		// 这样仰视时不会看到「轮子与本体之间露出缝隙」而像是轮子脱落。
-		// 上半截被本体完全遮住，只有贴地那一格露出来（暗色轮子材质）。
+		// 底部轮座：露出的 1 格 + 埋进本体内部的 1 格（避免仰视时看到轮子与本体之间的缝隙）。
+		// 必须拆成两个 4x1x4 立方体并各自使用原始 UV(0,12)：
+		// 若合成一个 4x2x4，box_uv 需要的贴图区域会变高，越界压到 neck/cap 的 UV，导致贴图错乱。
 		main.addOrReplaceChild("wheel", CubeListBuilder.create()
-				.texOffs(0, 12).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 2.0F, 4.0F, new CubeDeformation(0.0F)),
+				.texOffs(0, 12).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(0, 12).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)),
 				PartPose.offset(0.0F, 0.0F, 0.0F));
 		// 颈部柱：2x3x2，UV (16,12)
 		main.addOrReplaceChild("neck", CubeListBuilder.create()
