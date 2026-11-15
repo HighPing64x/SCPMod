@@ -3,7 +3,7 @@ package com.scpmod.client.screen;
 import com.scpmod.content.ModEntities;
 import com.scpmod.content.ModItems;
 import com.scpmod.entity.Scp173Entity;
-import com.scpmod.item.ScpDocumentItem;
+import com.scpmod.scp.ScpArchiveData;
 import com.scpmod.scp.ScpDefinition;
 import com.scpmod.scp.ScpRegistry;
 
@@ -54,7 +54,9 @@ public class ScpArchiveScreen extends Screen {
 
 	public ScpArchiveScreen(ItemStack document) {
 		super(Component.translatable("screen.scpmod.archive"));
-		this.recorded = ScpDocumentItem.recorded(document);
+		// 收录进度保存在玩家附件里（已同步到客户端），物品只是打开界面的入口。
+		this.recorded = new java.util.ArrayList<>(
+				ScpArchiveData.getOrEmpty(net.minecraft.client.Minecraft.getInstance().player));
 	}
 
 	@Override

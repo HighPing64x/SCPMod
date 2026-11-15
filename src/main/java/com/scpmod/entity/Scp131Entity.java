@@ -42,6 +42,8 @@ public class Scp131Entity extends PathfinderMob {
 	private int warnCooldown;
 	/** 下一次自行吱呀的倒计时。 */
 	private int chirpTimer = 60 + this.random.nextInt(120);
+	/** 缓存的附近 173（每 10 tick 刷新一次，降低实体搜索开销）。 */
+	private Scp173Entity cachedDanger;
 
 	public Scp131Entity(EntityType<? extends Scp131Entity> type, Level level) {
 		super(type, level);
@@ -113,7 +115,9 @@ public class Scp131Entity extends PathfinderMob {
 							SoundSource.NEUTRAL, 0.6F, 1.3F);
 				}
 				this.setPersistenceRequired();
-				com.scpmod.item.ScpDocumentItem.record((net.minecraft.server.level.ServerPlayer) player, "scp_131");
+				if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+					com.scpmod.item.ScpDocumentItem.record(serverPlayer, "scp_131");
+				}
 			} else {
 				if (this.level() instanceof ServerLevel serverLevel) {
 					serverLevel.sendParticles(ParticleTypes.HEART,
@@ -143,8 +147,12 @@ public class Scp131Entity extends PathfinderMob {
 			}
 		}
 		// 检测附近的危险异常（SCP-173）：靠近时尖叫警告并转为「看守」，盯着它不动。
-		Scp173Entity danger = this.level().getEntitiesOfClass(Scp173Entity.class,
-				this.getBoundingBox().inflate(16.0D)).stream().findFirst().orElse(null);
+		// 每 10 tick 才做一次实体搜索，避免大量眼豆时 O(n²) 的持续扫描开销。
+		if (this.tickCount % 10 == 0) {
+			this.cachedDanger = this.level().getEntitiesOfClass(Scp173Entity.class,
+					this.getBoundingBox().inflate(16.0D)).stream().findFirst().orElse(null);
+		}
+		Scp173Entity danger = this.cachedDanger;
 		if (danger != null) {
 			this.getLookControl().setLookAt(danger, 30.0F, 30.0F);
 			this.setWarning(true);
