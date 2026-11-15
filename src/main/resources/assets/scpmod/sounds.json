@@ -9,13 +9,21 @@
 		]
 	},
 	"scp131_chirp": {
-		"type": "event",
-		"name": "minecraft:entity.parrot.ambient",
-		"subtitle": "subtitles.scpmod.scp131_chirp"
+		"subtitle": "subtitles.scpmod.scp131_chirp",
+		"sounds": [
+			{
+				"type": "event",
+				"name": "minecraft:entity.allay.ambient_without_item"
+			}
+		]
 	},
 	"scp131_alarm": {
-		"type": "event",
-		"name": "minecraft:entity.parrot.hurt",
-		"subtitle": "subtitles.scpmod.scp131_alarm"
+		"subtitle": "subtitles.scpmod.scp131_alarm",
+		"sounds": [
+			{
+				"type": "event",
+				"name": "minecraft:entity.silverfish.ambient"
+			}
+		]
 	}
 }

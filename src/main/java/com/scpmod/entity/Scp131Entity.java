@@ -3,6 +3,7 @@ package com.scpmod.entity;
 import com.scpmod.content.ModSounds;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -39,6 +40,8 @@ public class Scp131Entity extends PathfinderMob {
 	/** 建立亲近关系的玩家。 */
 	private UUID bondedPlayer;
 	private int warnCooldown;
+	/** 下一次自行吱呀的倒计时。 */
+	private int chirpTimer = 60 + this.random.nextInt(120);
 
 	public Scp131Entity(EntityType<? extends Scp131Entity> type, Level level) {
 		super(type, level);
@@ -63,9 +66,12 @@ public class Scp131Entity extends PathfinderMob {
 	public static AttributeSupplier.Builder createAttributes() {
 		// 动作极快（原文：数秒内可移动 60m 以上），几乎没有生命值压力（Safe 级）。
 		return PathfinderMob.createMobAttributes()
-				.add(Attributes.MAX_HEALTH, 20.0D)
+				.add(Attributes.MAX_HEALTH, 8.0D)
 				.add(Attributes.MOVEMENT_SPEED, 0.5D)
-				.add(Attributes.FOLLOW_RANGE, 32.0D);
+				.add(Attributes.FOLLOW_RANGE, 32.0D)
+				.add(Attributes.ATTACK_DAMAGE, 1.0D)
+				// 眼豆是 Safe 级无害生物：不会主动攻击，也只受轻微伤害。
+				.add(Attributes.KNOCKBACK_RESISTANCE, 0.0D);
 	}
 
 	public int getVariant() {
@@ -104,7 +110,7 @@ public class Scp131Entity extends PathfinderMob {
 					serverLevel.sendParticles(ParticleTypes.HEART,
 							this.getX(), this.getY() + 0.5D, this.getZ(), 4, 0.2D, 0.2D, 0.2D, 0.0D);
 					this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_CHIRP,
-							SoundSource.NEUTRAL, 1.0F, 1.4F);
+							SoundSource.NEUTRAL, 0.6F, 1.3F);
 				}
 				this.setPersistenceRequired();
 				com.scpmod.item.ScpDocumentItem.record((net.minecraft.server.level.ServerPlayer) player, "scp_131");
@@ -127,6 +133,15 @@ public class Scp131Entity extends PathfinderMob {
 		if (this.warnCooldown > 0) {
 			this.warnCooldown--;
 		}
+		// 平时也会不定时发出尖锐吱呀声（原文：以不能翻译的尖锐吱呀声互相交流）。
+		// 为避免一群眼豆同时尖叫导致音量叠加，只有附近「发言者」不超过 2 只时才出声。
+		if (--this.chirpTimer <= 0) {
+			this.chirpTimer = 300 + this.random.nextInt(400);
+			if (scpmod$canSpeak()) {
+				this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_CHIRP,
+						SoundSource.NEUTRAL, 0.45F, 1.1F + (this.random.nextFloat() - 0.5F) * 0.3F);
+			}
+		}
 		// 检测附近的危险异常（SCP-173）：靠近时尖叫警告并转为「看守」，盯着它不动。
 		Scp173Entity danger = this.level().getEntitiesOfClass(Scp173Entity.class,
 				this.getBoundingBox().inflate(16.0D)).stream().findFirst().orElse(null);
@@ -135,13 +150,37 @@ public class Scp131Entity extends PathfinderMob {
 			this.setWarning(true);
 			this.getNavigation().stop();
 			if (this.warnCooldown <= 0) {
-				this.warnCooldown = 40;
-				this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_ALARM,
-						SoundSource.NEUTRAL, 1.0F, 1.6F);
+				// 冷却 + 随机抖动，避免多只眼豆的尖叫完全同步叠加。
+				this.warnCooldown = 30 + this.random.nextInt(25);
+				if (scpmod$canSpeak()) {
+					this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_ALARM,
+							SoundSource.NEUTRAL, 0.7F, 1.2F + (this.random.nextFloat() - 0.5F) * 0.3F);
+				}
 			}
 		} else if (this.isWarning()) {
 			this.setWarning(false);
 		}
+	}
+
+	/** 附近同类过多时只有少数发声，防止声音同步叠加。 */
+	public boolean scpmod$canSpeak() {
+		java.util.List<Scp131Entity> nearby = this.level().getEntitiesOfClass(Scp131Entity.class,
+				this.getBoundingBox().inflate(6.0D));
+		if (nearby.size() <= 2) {
+			return true;
+		}
+		int better = 0;
+		for (Scp131Entity other : nearby) {
+			if (other == this) {
+				continue;
+			}
+			// tickCount 早的优先（稳定、不会每 tick 抖动）
+			if (other.tickCount < this.tickCount
+					|| (other.tickCount == this.tickCount && other.getId() < this.getId())) {
+				better++;
+			}
+		}
+		return better < 2;
 	}
 
 	/** 眼豆是否正在盯着给定的 173（用于让 173 无法移动）。 */
@@ -160,17 +199,21 @@ public class Scp131Entity extends PathfinderMob {
 
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		// 原文：对它的谩骂与虐待会被严厉训斥 —— 这里改为「几乎打不死」，逼玩家别欺负它。
-		if (source.getEntity() instanceof Player) {
-			if (this.level() instanceof ServerLevel serverLevel) {
-				serverLevel.sendParticles(ParticleTypes.ANGRY_VILLAGER,
-						this.getX(), this.getY() + 0.5D, this.getZ(), 3, 0.3D, 0.3D, 0.3D, 0.0D);
+		// 被打时发出恐慌尖叫；如果是被亲近的玩家打的，会解除亲近关系（记仇）。
+		boolean hurt = super.hurtServer(level, source, amount);
+		if (hurt) {
+			this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_ALARM,
+					SoundSource.NEUTRAL, 0.8F, 0.95F);
+			level.sendParticles(ParticleTypes.ANGRY_VILLAGER,
+					this.getX(), this.getY() + 0.4D, this.getZ(), 3, 0.2D, 0.2D, 0.2D, 0.0D);
+			if (source.getEntity() instanceof Player player) {
+				if (this.bondedPlayer != null && this.bondedPlayer.equals(player.getUUID())) {
+					this.bondedPlayer = null;
+					player.sendSystemMessage(Component.translatable("message.scpmod.scp131.bond_broken"));
+				}
 			}
-			this.level().playSound(null, this.blockPosition(), ModSounds.SCP131_CHIRP,
-					SoundSource.NEUTRAL, 1.0F, 0.7F);
-			return false;
 		}
-		return super.hurtServer(level, source, amount);
+		return hurt;
 	}
 
 	@Override

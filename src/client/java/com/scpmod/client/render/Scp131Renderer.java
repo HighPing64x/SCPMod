@@ -49,6 +49,8 @@ public class Scp131Renderer extends EntityRenderer<Scp131Entity, Scp131RenderSta
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - state.bodyRotation));
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.translate(0.0F, -1.5F, 0.0F);
+		// 用户模型高 11 像素（约 0.69 格），整体下移让底轮贴地
+		poseStack.translate(0.0F, 0.0F, 0.0F);
 		collector.submitModel(this.model, state, poseStack,
 				state.variant == 0 ? TEXTURE_A : TEXTURE_B, state.lightCoords,
 				OverlayTexture.NO_OVERLAY, state.outlineColor, null);
