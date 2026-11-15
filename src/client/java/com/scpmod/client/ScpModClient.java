@@ -1,7 +1,9 @@
 package com.scpmod.client;
 
+import com.scpmod.client.model.Scp131Model;
 import com.scpmod.client.model.Scp173Model;
 import com.scpmod.client.screen.ScpArchiveScreen;
+import com.scpmod.client.render.Scp131Renderer;
 import com.scpmod.client.render.Scp173Renderer;
 import com.scpmod.content.ModEntities;
 import com.scpmod.content.ModFluids;
@@ -24,7 +26,9 @@ public class ScpModClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ModelLayerRegistry.registerModelLayer(Scp173Model.LAYER_LOCATION, Scp173Model::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(Scp131Model.LAYER_LOCATION, Scp131Model::createBodyLayer);
 		EntityRendererRegistry.register(ModEntities.SCP_173, Scp173Renderer::new);
+		EntityRendererRegistry.register(ModEntities.SCP_131, Scp131Renderer::new);
 		FluidRenderingRegistry.register(ModFluids.SCP_006, ModFluids.SCP_006_FLOWING,
 				new FluidModel.Unbaked(
 						new Material(Identifier.fromNamespaceAndPath("minecraft", "block/water_still")),

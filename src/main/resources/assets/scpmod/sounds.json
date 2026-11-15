@@ -1,11 +1,21 @@
 {
-  "scrape": {
-    "subtitle": "subtitles.scpmod.scrape",
-    "sounds": [
-      {
-        "type": "event",
-        "name": "minecraft:block.grindstone.use"
-      }
-    ]
-  }
+	"scrape": {
+		"subtitle": "subtitles.scpmod.scrape",
+		"sounds": [
+			{
+				"type": "event",
+				"name": "minecraft:block.grindstone.use"
+			}
+		]
+	},
+	"scp131_chirp": {
+		"type": "event",
+		"name": "minecraft:entity.parrot.ambient",
+		"subtitle": "subtitles.scpmod.scp131_chirp"
+	},
+	"scp131_alarm": {
+		"type": "event",
+		"name": "minecraft:entity.parrot.hurt",
+		"subtitle": "subtitles.scpmod.scp131_alarm"
+	}
 }

@@ -26,7 +26,10 @@ public final class ModCreativeTabs {
 		register(ENTITIES, FabricCreativeModeTab.builder()
 				.title(Component.translatable("itemGroup.scpmod.entities"))
 				.icon(() -> new ItemStack(ModItems.SCP_173_SPAWNER))
-				.displayItems((context, output) -> output.accept(ModItems.SCP_173_SPAWNER))
+				.displayItems((context, output) -> {
+					output.accept(ModItems.SCP_173_SPAWNER);
+					output.accept(ModItems.SCP_131_SPAWNER);
+				})
 				.build());
 
 		register(BLOCKS, FabricCreativeModeTab.builder()

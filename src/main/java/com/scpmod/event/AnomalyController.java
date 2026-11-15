@@ -275,6 +275,13 @@ public final class AnomalyController {
 	}
 
 	private static boolean isObservedByAnyone(ServerLevel level) {
+		// SCP-131 眼豆从不「眨眼」：只要它在看着 173，173 就完全无法移动。
+		for (com.scpmod.entity.Scp131Entity bean : level.getEntitiesOfClass(
+				com.scpmod.entity.Scp131Entity.class, body.getBoundingBox().inflate(24.0D))) {
+			if (bean.isWatching(body)) {
+				return true;
+			}
+		}
 		AnomalyConfig cfg = AnomalyConfig.get();
 		double fov = Math.max(10.0D, Math.min(170.0D, cfg.observationFovDegrees));
 		double cosLimit = Math.cos(Math.toRadians(fov * 0.5D));
